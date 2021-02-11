@@ -1,0 +1,177 @@
+<html>
+    <head>
+        <title>CARD PUZZEL</title>
+
+        <style>
+            img{
+                width:70px;
+                border:solid white;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            span{
+              color: red;
+              font-size:23px;
+            }
+            body{
+              background-color:#222;
+            }
+            h1{
+              color: blanchedalmond;
+            }
+            #winText{
+              font-size: 20px;
+            }
+        </style>
+
+    </head>
+
+    <body id='body'>
+      <center>
+         <div id='root'></div>
+      </center>
+
+
+      <script>
+      let selectedCard = 0;//selected card(first clicked card)
+      let winStateRow=[0,0,0,0];//Rows state..
+      let winStateCol=[0,0,0,0];//Columns state..
+      
+      let content=`<h1>✡ CARD PUZZEL ✡&emsp;</h1> <p id="winText"></p>`;
+          content+= `<table><tr>`;
+      for(let i=0;i<16;i++){
+           content+= `<td><img onclick="clicked('img${i}')" id='img${i}'></td> `;
+           
+           if((i+1)%4==0){
+                content+=`<td>&emsp;<span id="row${((i+1)/4)-1}">✘</span></td></tr><tr>`;
+           }
+      }
+
+      for(let i=0;i<4;i++){
+            content+=`<td>&emsp;&emsp;<span id="col${i}">✘</span></td>`;
+      }
+
+      content+= `</tr></table>`;
+      
+      document.getElementById('root').innerHTML=content; //create buttons and images
+
+
+      let img=[     // Startup cards places....
+        15,16,17,18,
+        25,26,27,28,
+        35,36,37,38,
+        45,46,47,48];
+
+      function loadImg(){//load image src function (Reload images to DOM)
+          for(let i=0;i<16;i++){ 
+              document.getElementById(`img${i}`).src=`img/${img[i]}.png`;
+          }
+       }
+
+      loadImg();//Reload images to DOM
+       
+      //Check lines & Win
+      function check(){
+
+        //check rows
+        for(let j=0;j<16;j+=4){
+          let rowR=new Set();
+          let rowL=new Set();
+          for(let i=j;i<(j+4);i++){
+            rowR.add(String(img[i]).substring(1,2));
+            rowL.add(String(img[i]).substring(0,1));
+          }
+          if((rowR.size==4) && (rowL.size==4 )){
+            console.log(`Row - ${j/4} ✔`);
+            document.getElementById(`row${j/4}`).innerHTML="✔";
+            document.getElementById(`row${j/4}`).style.color="green";
+            winStateRow[j/4]=1;
+          }
+          else{
+            console.log(`Row - ${j/4} ✘`);
+            document.getElementById(`row${j/4}`).innerHTML="✘";
+            document.getElementById(`row${j/4}`).style.color="red";
+            winStateRow[j/4]=0;
+          }
+        }
+        
+        //check columns
+        for(let j=0;j<4;j++){
+          let colR=new Set();
+          let colL=new Set();
+          for(let i=j;i<16;i+=4){
+            colR.add(String(img[i]).substring(1,2));
+            colL.add(String(img[i]).substring(0,1));
+          }
+          if((colR.size==4) && (colL.size==4 )){
+            console.log(`Col - ${j} ✔`);
+            document.getElementById(`col${j}`).innerHTML="✔";
+            document.getElementById(`col${j}`).style.color="green";
+            winStateCol[j]=1;
+          }
+          else{
+            console.log(`Col - ${j} ✘`);
+            document.getElementById(`col${j}`).innerHTML="✘";
+            document.getElementById(`col${j}`).style.color="red";
+            winStateCol[j]=0;
+          }
+        }
+
+        //check win
+          let win=true;
+          for(let i=0;i<4;i++){
+              if(winStateCol[i]=== 0 || winStateRow[i]=== 0 ){
+                win=false;
+              }
+          }
+          if(win){
+            document.getElementById('winText').innerHTML="YOU WIN!!!"; //Display Win message!
+            document.querySelector('body').style.backgroundColor="#7CB9E8";//chage background Color 
+          }
+        
+      }
+
+
+
+      function clicked(id){ //id ex: img15
+       
+        console.log('Clicked!',id);
+        const bt=document.getElementById(id);
+       
+
+        if(id==selectedCard){//check -> ckicked on same card
+          
+          //remove select
+           selectedCard = 0;
+           bt.style.border="solid white";
+
+        }
+
+        else{ //clicked on new card
+          
+          if(selectedCard != 0){//check (user want to chageing cards)
+             document.getElementById(selectedCard).style.border="solid white";
+
+             //change cards
+             const newClick=Number(id.split('g')[1]); //id = new clicked image ID /// eg: 'img0' -> 'im','0' -> 0
+             const firstClick=Number(selectedCard.split('g')[1]); //selectedCard - first clicked image ID /// eg: 'img1' -> 'im','1' -> 1
+            
+             // Change img Array two values (changing cards)
+             [img[firstClick], img[newClick]] = [img[newClick] , img[firstClick]]; 
+
+             loadImg();//Reload images to DOM
+             selectedCard = 0;
+             bt.style.border="solid white";
+           }
+           else{
+             document.getElementById(id).style.border="solid blue";
+             selectedCard = id;
+           }
+
+        }
+        check();//check | rows/cols ✔ ? | rows/cols ✘ ? | YOU WIN? 
+      }
+
+      </script>     
+</body>
+</html>
